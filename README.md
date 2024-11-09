@@ -24,6 +24,9 @@ source ./bin/activate
 pip install ansible
 ```
 ```
+ansible-galaxy collection install community.docker
+```
+```
 git clone https://github.com/viktorisup/available_cluster_ansible.git
 ```
 ```
