@@ -30,7 +30,7 @@ git clone https://github.com/viktorisup/available_cluster_ansible.git
 cd available_cluster_ansible
 ```
 ```
-ansible-playbook blaybook.yaml
+ansible-playbook -i ./inventory/hosts.yaml blaybook.yaml
 ```
 ### для установки локально раскоментируйте строчки в playbook.yaml и в hosts.yaml и закоментируйте group1 в hosts.yaml
 ### Кластер станет доступен по адресу 10.0.0.200
