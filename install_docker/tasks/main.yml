@@ -1,0 +1,48 @@
+---
+# tasks file for install_docker
+- name: Install pakages
+  ansible.builtin.apt:
+    package: 
+      - ca-certificates
+      - curl
+      - gnupg2
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Create a directory /etc/apt/keyrings/
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/
+    state: directory
+    mode: '0755'
+
+- name: Add an Apt signing key, uses whichever key is at the URL
+  ansible.builtin.apt_key:
+    url: 'https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }}/gpg'
+    state: present
+    keyring: /etc/apt/keyrings/docker.gpg
+
+- name: Add repo
+  ansible.builtin.apt_repository:
+    repo: 'deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable'
+    state: present
+    filename: docker
+
+- name: Install pakages
+  ansible.builtin.apt:
+    package: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      # - docker-compose   # depricated
+    state: present
+    update_cache: yes
+    cache_valid_time: 0
+
+- name: Start systemd unit
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true

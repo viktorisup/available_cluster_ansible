@@ -1,0 +1,80 @@
+services:
+  web1:
+    image: nginx:latest
+    hostname: nginx1
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ./site1/default.conf:/etc/nginx/conf.d/default.conf
+      - ./site1/index.html:/usr/share/nginx/html/index.html
+    networks:
+      haproxy_net:
+        ipv4_address: 10.0.0.10
+
+  web2:
+    image: nginx:latest
+    hostname: nginx2
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ./site2/default.conf:/etc/nginx/conf.d/default.conf
+      - ./site2/index.html:/usr/share/nginx/html/index.html
+    networks:
+      haproxy_net:
+        ipv4_address: 10.0.0.11
+
+  keep-haproxy1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: haproxy1
+    restart: unless-stopped
+    depends_on:
+      - web1
+      - web2
+    ports:
+      - "8080:80"
+      - "8404:8404"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./keepalived/keepmaster.conf:/etc/keepalived/keepalived.conf
+    networks:
+      haproxy_net:
+        ipv4_address: 10.0.0.20
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    entrypoint: ["/bin/sh", "-c", "keepalived -D -f /etc/keepalived/keepalived.conf && haproxy -f /usr/local/etc/haproxy/haproxy.cfg"]
+
+  keep-haproxy2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: haproxy2
+    restart: unless-stopped
+    depends_on:
+      - web1
+      - web2
+    ports:
+      - "8081:80"
+      - "8405:8404"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./keepalived/keepslave.conf:/etc/keepalived/keepalived.conf
+    networks:
+      haproxy_net:
+        ipv4_address: 10.0.0.21
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+    entrypoint: ["/bin/sh", "-c", "keepalived -D -f /etc/keepalived/keepalived.conf && haproxy -f /usr/local/etc/haproxy/haproxy.cfg"]
+
+networks:
+  haproxy_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1

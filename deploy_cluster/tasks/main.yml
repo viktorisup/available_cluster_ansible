@@ -1,0 +1,17 @@
+---
+# tasks file for deploy_cluster
+- name: create directory
+  ansible.builtin.file:
+    path: /opt/docker-cluster
+    state: directory
+    mode: '0755'
+    
+- name: copy all config file
+  ansible.builtin.synchronize:
+    src: "{{ role_path }}/files/"
+    dest: /opt/docker-cluster
+
+- name: deploy project
+  community.docker.docker_compose_v2:
+    project_src: /opt/docker-cluster
+

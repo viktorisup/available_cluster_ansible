@@ -1,0 +1,9 @@
+- name: create highly available cluster
+  hosts: all
+  # hosts: localhost
+  # connection: local
+  become: true
+
+  roles:
+    - install_docker
+    - deploy_cluster
