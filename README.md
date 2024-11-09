@@ -18,7 +18,7 @@ python3 -m venv venv
 cd venv
 ```
 ```
-source ./bin/activate`
+source ./bin/activate
 ```
 ```
 pip install ansible
